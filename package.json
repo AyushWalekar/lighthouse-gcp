@@ -1,0 +1,26 @@
+{
+  "name": "lighthouse-gcp",
+  "version": "1.0.0",
+  "description": "lighthouse on google cloud function",
+  "main": "index.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/debug-agent": "^5.0.0",
+    "@google-cloud/functions-framework": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AyushWalekar/lighthouse-gcp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AyushWalekar/lighthouse-gcp/issues"
+  },
+  "homepage": "https://github.com/AyushWalekar/lighthouse-gcp#readme"
+}
