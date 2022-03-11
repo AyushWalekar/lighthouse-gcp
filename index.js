@@ -5,15 +5,20 @@ const desktopConfig = require('lighthouse/lighthouse-core/config/lr-desktop-conf
 const mobileConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
 
 exports.lighthouse_poc = async (req, res) => {
-    console.log(`On demnand generate lhr, url: ${req.query.url}, emulatedUserAgent: ${req.query.emulatedUserAgent}`);
-    const resultJson = await generateLighthouseReport(req.query.url, req.query.emulatedUserAgent);
+    var jobID = req.query.jobID;
+    const url = req.query.url;
+    const emulatedUserAgent = req.query.emulatedUserAgent;
+    if (!jobID) {
+        jobID = new Date().getTime();
+    }
+    console.log(`On demnand generate lhr, jobID: ${jobID} url: ${url}, emulatedUserAgent: ${emulatedUserAgent}`);
+    const resultJson = await generateLighthouseReport(jobID, url, emulatedUserAgent);
     res.status(200).send(resultJson);
 }
 
-
-var generateLighthouseReport = async (url, emulatedUserAgent = 'desktop') => {
-    const jobID = new Date().getTime();
-    var result;
+var generateLighthouseReport = async (jobID, url, emulatedUserAgent = 'desktop') => {
+    var status = 'success';
+    var lhr = {};
     var browser;
     var config;
     if (emulatedUserAgent == 'mobile') {
@@ -29,13 +34,17 @@ var generateLighthouseReport = async (url, emulatedUserAgent = 'desktop') => {
         // `.lhr` is the Lighthouse Result as a JS object
         console.log(`jobID: ${jobID} Generated lighthouse report for, url:${runnerResult.lhr.finalUrl}, emulatedUserAgent: ${emulatedUserAgent}`);
 
-        result = runnerResult.lhr;
+        lhr = runnerResult.lhr;
+        if (lhr.runtimeError) {
+            status = 'error';
+        }
     }
     catch (e) {
         console.log(e);
-        result = null;
+        lhr.audits = null;
+        lhr.categories = null;
     } finally {
         await browser.close();
     }
-    return { jobID: jobID, result: result };
+    return { jobID: jobID, status: status, audits: lhr.audits, categories: lhr.categories };
 }
