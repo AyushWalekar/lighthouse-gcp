@@ -1,8 +1,9 @@
 const { URL } = require(`url`);
 const lighthouse = require('lighthouse');
 const puppeteer = require(`puppeteer`);
-const desktopConfig = require('lighthouse/lighthouse-core/config/lr-desktop-config');
-const mobileConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
+//Overrode config to run ONLY for required audits & categories
+const desktopConfig = require('./custom-lr-desktop-config');
+const mobileConfig = require('./custom-lr-mobile-config');
 
 exports.lighthouse_poc = async (req, res) => {
     var jobID = req.query.jobID;
