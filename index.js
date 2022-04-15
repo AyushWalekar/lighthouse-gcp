@@ -5,20 +5,22 @@ const puppeteer = require(`puppeteer`);
 const desktopConfig = require('./custom-lr-desktop-config');
 const mobileConfig = require('./custom-lr-mobile-config');
 
-exports.lighthouse_poc = async (req, res) => {
+exports.lighthouse = async (req, res) => {
     var jobID = req.query.jobID;
     const url = req.query.url;
     const emulatedUserAgent = req.query.emulatedUserAgent;
     if (!jobID) {
         jobID = new Date().getTime();
     }
-    console.log(`On demnand generate lhr, jobID: ${jobID} url: ${url}, emulatedUserAgent: ${emulatedUserAgent}`);
+    console.log(`On demand generate lhr, jobID: ${jobID} url: ${url}, emulatedUserAgent: ${emulatedUserAgent}`);
     const resultJson = await generateLighthouseReport(jobID, url, emulatedUserAgent);
+    //TODO: change status code for lh internal errors? and return error message in response?
     res.status(200).send(resultJson);
 }
 
 var generateLighthouseReport = async (jobID, url, emulatedUserAgent = 'desktop') => {
-    var status = 'success';
+    var status = 'error';
+    var error = {};
     var lhr = {};
     var browser;
     var config;
@@ -38,14 +40,28 @@ var generateLighthouseReport = async (jobID, url, emulatedUserAgent = 'desktop')
         lhr = runnerResult.lhr;
         if (lhr.runtimeError) {
             status = 'error';
+            error.code = lhr.runtimeError.code;
+            error.message = lhr.runtimeError.message;
+            console.log(`runtime error: jobID: ${jobID}, url:${runnerResult.lhr.finalUrl}, error: ${JSON.stringify(error)}`);
         }
+        status = 'success';
     }
     catch (e) {
         console.log(e);
-        lhr.audits = null;
-        lhr.categories = null;
+        status = 'error';
+        if (e.lhrRuntimeError) {
+            error.code = e.code;
+            error.message = e.friendlyMessage;
+        }
     } finally {
-        await browser.close();
+        if (browser) {
+            await browser.close();
+        } else {
+            console.log(`failed: to launch browser jobID: ${jobID}, url:${url}, emulatedUserAgent: ${emulatedUserAgent}`);
+        }
+    }
+    if (status == 'error') {
+        return { jobID: jobID, status: status, error: error };
     }
     return { jobID: jobID, status: status, audits: lhr.audits, categories: lhr.categories };
 }
