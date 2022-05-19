@@ -1,16 +1,38 @@
-let mobileConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
+/**
+ * @license Copyright 2018 The Lighthouse Authors. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
+'use strict';
 
-if (mobileConfig.settings.skipAudits) {
-  delete mobileConfig.settings.skipAudits;
-}
+/** @type {LH.Config.Json} */
+const config = {
+  extends: 'lighthouse:default',
+  settings: {
+    maxWaitForFcp: 15 * 1000,
+    maxWaitForLoad: 35 * 1000,
+    onlyAudits: [
+      'is-on-https',
+      'viewport',
+      'font-size',
+      'tap-targets',
+      'plugins',
+      'content-width',
+      'viewport-device-width'
+    ],
+    onlyCategories: ['performance']
+  },
+  audits: [
+    'viewport-device-width',
+  ],
+  // categories: {
+  //   // TODO(bckenny): type extended Config where e.g. category.title isn't required
+  //   performance: /** @type {LH.Config.CategoryJson} */({
+  //     auditRefs: [
+  //       // { id: 'first-contentful-paint-3g', weight: 0 },
+  //     ],
+  //   }),
+  // },
+};
 
-mobileConfig.settings.onlyAudits = ['first-contentful-paint',
-  'largest-contentful-paint',
-  'max-potential-fid',
-  'total-blocking-time',
-  'cumulative-layout-shift',
-  'interactive'
-];
-mobileConfig.settings.onlyCategories = ['performance'];
-
-module.exports = mobileConfig;
+module.exports = config;

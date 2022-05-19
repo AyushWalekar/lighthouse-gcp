@@ -38,18 +38,18 @@ var generateLighthouseReport = async (jobID, url, emulatedUserAgent = 'desktop')
         console.log(`jobID: ${jobID} Generated lighthouse report for, url:${runnerResult.lhr.finalUrl}, emulatedUserAgent: ${emulatedUserAgent}`);
 
         lhr = runnerResult.lhr;
+        status = 'success';
         if (lhr.runtimeError) {
             status = 'error';
             error.code = lhr.runtimeError.code;
             error.message = lhr.runtimeError.message;
             console.log(`runtime error: jobID: ${jobID}, url:${runnerResult.lhr.finalUrl}, error: ${JSON.stringify(error)}`);
         }
-        status = 'success';
     }
     catch (e) {
         console.log(e);
         status = 'error';
-        if (e.lhrRuntimeError) {
+        if (e.lhrRuntimeError || (e.name && e.name == 'LHError')) {
             error.code = e.code;
             error.message = e.friendlyMessage;
         }
